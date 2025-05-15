@@ -1,0 +1,6 @@
+my-auth-app/node_modules/
+server/node_modules/
+
+
+my-auth-app/.env
+server/.env
