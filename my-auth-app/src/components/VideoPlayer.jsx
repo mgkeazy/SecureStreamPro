@@ -5,6 +5,7 @@ export default function VideoPlayer({ videoId }) {
   const [otp, setOtp] = useState(null);
   const [playbackInfo, setPlaybackInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -16,7 +17,6 @@ export default function VideoPlayer({ videoId }) {
             }
         )
         const data=response.data;
-        console.log(data)
 
         setOtp(data.otp);
         setPlaybackInfo(data.playbackInfo); // keep Base64 string as-is

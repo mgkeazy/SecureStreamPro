@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Activate from './pages/Activate';
@@ -15,11 +15,12 @@ import Catalog from './pages/Catalog';
 import useUserStore from './store/useUserStore';
 import { Navigate } from 'react-router-dom';
 import AdminHomePage from './pages/AdminHomePage';
+
 const App = () => {
   const user = useUserStore((state)=> state.user)
   return (
     <MantineProvider>
-      <Router>
+      {/* <Router>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Header />
           <div style={{ flex: 1 }}>
@@ -69,7 +70,12 @@ const App = () => {
           </div>
           <Footer />
         </div>
-      </Router>
+      </Router> */}
+      <div>
+        <Header/>
+        <Outlet/>
+        <Footer/>
+      </div>
     </MantineProvider>
   );
 };

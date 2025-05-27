@@ -5,7 +5,7 @@ import axios from "axios";
 const CourseCard = ({ course }) => {
   const user = useUserStore((state) => state.user);
   const BACKEND_URI = import.meta.env.VITE_BACKEND_URL;
-  const [enrolled, setEnrolled] = useState(false);
+  const [enrolled, setEnrolled] = useState("");
 
   const renderStars = (rating = 0) => {
     const fullStars = Math.floor(rating);
@@ -34,8 +34,6 @@ const CourseCard = ({ course }) => {
 
     return stars;
   };
-  // console.log(course._id)
-  // console.log(user._id)
   const handleEnroll = async () => {
     try {
       const response = await axios.post(
@@ -46,6 +44,7 @@ const CourseCard = ({ course }) => {
             
         }
       );
+      setEnrolled("pending");
     } catch (error) {
       console.error("Error enrolling in course", error);
     }
@@ -61,7 +60,6 @@ const CourseCard = ({ course }) => {
           },
           withCredentials: true,
         });
-        console.log(response);
         if(response.data){
           setEnrolled(response.data.status);
         }
@@ -70,7 +68,8 @@ const CourseCard = ({ course }) => {
       }
     }
     if(user?._id) checkEnrollmentStatus();
-  },[user._id,course._id])
+  },[user._id,course._id,enrolled])
+
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105">
@@ -97,15 +96,24 @@ const CourseCard = ({ course }) => {
           <span className="text-xl font-bold text-indigo-600">
             ₹{course.price}
           </span>
-          <button
-            onClick={handleEnroll}
-            className={`${
-              enrolled ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
-            } text-white px-4 py-2 rounded-lg transition-colors`}
-            disabled={enrolled} // Disable the button once enrolled
-          >
-            {enrolled ? "Requested" : "Enroll Now"}
-          </button>
+          
+          {enrolled==="approved" ? (
+            <div className="bg-green-500 text-white px-4 py-2 rounded-lg inline-block">
+            Enrolled
+          </div>
+          ): (
+            <button
+              onClick={handleEnroll}
+              className={`${
+                enrolled ? "bg-gray-400" : "cursor-pointer bg-indigo-600 hover:bg-indigo-700"
+              } text-white px-4 py-2 rounded-lg transition-colors`}
+              disabled={enrolled} // Disable the button once enrolled
+            >
+              {enrolled==="pending" ? "Requested" : "Enroll Now"}
+            </button>
+          )}
+
+
         </div>
       </div>
     </div>

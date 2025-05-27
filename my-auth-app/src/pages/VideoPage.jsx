@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import useVideoStore from '../store/useVideoStore';
 import VideoPlayer from '../components/VideoPlayer';
 import { useNavigate } from 'react-router-dom';

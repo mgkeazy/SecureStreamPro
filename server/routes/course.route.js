@@ -1,7 +1,11 @@
 import express from "express";
-import { addAnswer, addQuestion, addReplyToReview, addReview, deleteCourse, editCourse, enrollmentRequest, enrollmentStatus, getAllCatalogCourses, getAllCourses, getCourseByUser, getSingleCourse, uploadCourse } from "../controllers/course.controller.js";
+import { addAnswer, addQuestion, addReplyToReview, addReview, deleteCourse, editCourse, enrollmentRequest, enrollmentStatus, getAllCatalogCourses, getAllCourses, getCourseByUser, getSingleCourse, uploadCourse, uploadImage } from "../controllers/course.controller.js";
 import { authorizeRoles, isAuthenticated } from "../middlewares/auth.js";
 const courseRouter = express.Router();
+import multer from 'multer';
+const storage = multer.memoryStorage();
+const upload = multer ({storage})
+
 
 courseRouter.post("/create-course", isAuthenticated, authorizeRoles("admin"), uploadCourse);
 
@@ -25,7 +29,7 @@ courseRouter.put(
     authorizeRoles("admin"),
     addReplyToReview
   );
-  
+
   courseRouter.get(
     "/get-catalog-courses",
     // isAuthenticated,
@@ -39,10 +43,12 @@ courseRouter.put(
     authorizeRoles("admin"),
     deleteCourse
   );
-  
+
   courseRouter.post("/courses/:courseId/enrollRequest", isAuthenticated, enrollmentRequest);
   courseRouter.get("/courses/enrollment-status", isAuthenticated, enrollmentStatus);
-  
+
+  courseRouter.post("/upload-image",upload.single("image") ,isAuthenticated, authorizeRoles("admin"), uploadImage);
+
 
 
 export default courseRouter

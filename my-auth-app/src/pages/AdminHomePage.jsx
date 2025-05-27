@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import Requests from '../components/EnrollRequests';
+import Requests from '../components/Requests';
+import ApprovedRequests from '../components/ApprovedRequests';
+import Assignments from '../components/Assignments';
 // import AddAssignments from '../components/AddAssignments';
 // import Notifications from '../components/Notifications';
 // import Requests from '../components/Requests';
@@ -8,6 +10,23 @@ import Requests from '../components/EnrollRequests';
 
 const AdminHomePage = () => {
   const [selectedOption, setSelectedOption] = useState('assignments');
+  const [hasNewRequest, setHasNewRequest] = useState(false);
+
+    useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasNewRequest(true);
+    }, 5000); // simulate new request after 5s
+
+    return () => clearTimeout(timer);
+  }, []);
+
+
+    const handleSelect = (clickedMenuItem) => {
+    setSelectedOption(clickedMenuItem);
+    if (clickedMenuItem === 'requests') {
+      setHasNewRequest(false);
+    }
+  };
 
   const renderContent = () => {
     switch (selectedOption) {
@@ -17,8 +36,10 @@ const AdminHomePage = () => {
       //   return <Notifications />;
       case 'requests':
         return <Requests/>;
-      // case 'updateStudent':
-      //   return <UpdateStudent />;
+      case 'ApprovedRequests':
+        return <ApprovedRequests />;
+      case 'assignments':
+        return <Assignments />;
       default:
         return <div>Select an option to view content</div>;
     }
@@ -34,7 +55,7 @@ const AdminHomePage = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
         <div className="sidebar-container w-64 bg-gray-800 text-white p-6 transition-all ease-in-out duration-300">
-          <Sidebar onSelect={setSelectedOption} />
+          <Sidebar onSelect={setSelectedOption} hasNewRequest={hasNewRequest}/>
         </div>
 
         {/* Right Content Area */}

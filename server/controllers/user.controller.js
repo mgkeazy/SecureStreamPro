@@ -209,7 +209,6 @@ export const getUserInfo = CatchAsyncError(async (req, res, next) => {
   }
 });
 
-
 //social auth
 export const socialAuth =CatchAsyncError(async(req,res,next)=>{
     try{

@@ -3,12 +3,11 @@ import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
 
 export default function CourseUploadForm() {
-  console.log(import.meta.env.VITE_CLOUD_NAME)
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
-  const [videos, setVideos] = useState([]);
+  const BACKEND_URI=import.meta.env.VITE_BACKEND_URL
   const [thumbnail, setThumbnail] = useState(null);
   const [uploading, setUploading] = useState(false);
-
+  const [image, setImage] = useState('')
+  const [uploaded, setUploaded] = useState(false);
   const {
     register,
     handleSubmit,
@@ -53,93 +52,60 @@ export default function CourseUploadForm() {
     remove: removeCourseData,
   } = useFieldArray({ control, name: "courseData" });
 
-  const onSubmit = async (data) => {
-    console.log(data);
-  };
 
   const watchCourseData = watch("courseData");
 
-  // const handleFileChange = async (e, index) => {
-  //   // setVideos([...videos, e.target.files[0]]);
+  // upload image in cloudinary via backened
+  const handleFileChangeImage = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
 
-  //   const file=e.target.files[0];
-  //   if (!file) return alert('Choose a file first');
-
-  //   // 1️⃣ Step 1: Request upload credentials
-  //   const title = encodeURIComponent(file.name);
-  //   const credRes = await axios.put(
-  //     'http://localhost:8000/api/v1/getCredentials',
-  //     { title },{
-  //       withCredentials:true
-  //     }
-  //   );
-  //   console.log(credRes)
-  //   const { clientPayload, videoId } = credRes.data;
-
-  //   // 2️⃣ Step 2: Actually upload the file
-  //   const form = new FormData();
-  //   // pass the server‐returned payload (stringify if needed)
-  //   form.append('clientPayload', JSON.stringify(clientPayload));
-  //   form.append('videoId', videoId);
-  //   form.append('file', file);
-
-  //   console.log(credRes);
-
-  //   const uploadRes = await axios.post(
-  //     'http://localhost:8000/api/v1/upload-vdo-cipher',
-  //     form,
-  //     { headers: { 'Content-Type': 'multipart/form-data' } }
-  //   );
-  //   // 3️⃣ Notify parent when done
-  //   onUploaded(uploadRes.data.videoId);
-  //   console.log(uploadRes.data.videoId);
-  //   const vdoCipherId = uploadRes.data.videoId;
-
-  //   setValue(`courseData.${index}.videoUrl`, "chuttad", {
-  //     shouldValidate: true,
-  //     shouldDirty: true,
-  //   });
-  //   // console.log(courseFields[index].videoUrl);
-  // };
-
-  const handleImageUpload = async (file) => {
     setUploading(true);
 
-    // Assuming you're using Cloudinary to upload the image.
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "your_upload_preset"); // Replace with your actual preset
+    formData.append("image",file);
+    
+    try{
+      const res = await axios.post(`${BACKEND_URI}/upload-image`, formData,{
+        headers:{
+          "Content-Type":"multipart/form-data"
+        },
+        withCredentials:true,
+      })
 
-    try {
-      const response = await axios.post(
-        "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
-        formData
-      );
+      setThumbnail({
+        url: res.data.image.url,
+        public_id:res.data.image.public_id
+      });
 
-      const { public_id, secure_url } = response.data;
+      console.log(res.data)
 
-      // Create the thumbnail object
-      const thumbnailObj = {
-        public_id: public_id,
-        url: secure_url,
-      };
-
-      // Update React Hook Form and local state with the thumbnail object
-      setThumbnail(thumbnailObj); // This is for display purposes
-
-    } catch (error) {
-      console.error("Image upload failed:", error);
-    } finally {
-      setUploading(false);
+      setUploading(false)
+      setUploaded(true)
+    }catch(error){
+      console.log("Upload error:", error);
     }
-  };
+  }
+
+  const onSubmit = async(data) =>{
+    try{
+      const res = await axios.post(`${BACKEND_URI}/create-course`,data,{
+        withCredentials:true
+      })
+
+      console.log(res.data);
+    }catch(error){
+      console.log("Error while uploading", error)
+    }
+  }
 
   // UseEffect to update React Hook Form when thumbnail is set
   useEffect(() => {
+    console.log("hello")
     if (thumbnail) {
       setValue("thumbnail", thumbnail); // Set the thumbnail value in the form state
     }
-  }, [thumbnail, setValue]); // Runs when thumbnail changes
+  }, [thumbnail]); // Runs when thumbnail changes
 
   return (
     <form
@@ -207,18 +173,30 @@ export default function CourseUploadForm() {
 
       {/* Thumbanil */}
       <h3 className="text-lg font-semibold mt-4">Thumbnail</h3>
-      <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 mb-3 rounded inline-block">
-        Upload Image
-        <input
-          type="file"
-          accept="image/*"
-          {...register("image")}
-          onChange={(e)=> handleImageUpload(e.target.files[0])}
-          className="hidden"
-          disabled={uploading}
-        />
-      </label>
+
+      {!thumbnail ? (
+        <label className={`cursor-pointer bg-blue-500 text-white px-4 py-2 mb-3 rounded inline-block ${uploading ? "opacity-50 cursor-not-allowed" : ""}`}>
+          Upload Image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChangeImage}
+            className="hidden"
+            disabled={uploading}
+          />
+        </label>
+      ) : (
+        <div>
+          <p className="mb-2 text-green-600 font-semibold">Image Uploaded: {thumbnail.public_id}</p>
+          <img src={thumbnail.url} alt="Uploaded thumbnail" style={{ maxWidth: 200 }} />
+        </div>
+      )}
+
       {uploading && <p>Uploading...</p>}
+
+      {/* {image && (
+        <button className="mx-30 cursor-pointer bg-blue-500 text-white px-4 py-2 mb-3 rounded inline-block">Upload Image</button>
+      )} */}
       {/* <input
         type="text"
         {...register("thumbnail.public_id", { required: "Thumbnail public ID is required" })}

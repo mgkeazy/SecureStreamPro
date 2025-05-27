@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/useUserStore';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -21,18 +22,18 @@ const Header = () => {
 
                 {/* Navigation Links */}
                 <nav className="flex gap-6 items-center">
-                    <a href="/" className="text-white hover:text-gray-400 transition-colors">Home</a>
+                    <Link to="/" className="text-white hover:text-gray-400 transition-colors">Home</Link>
 
                     {!isLoggedIn && (
-                        <a href="/register" className="text-white hover:text-gray-400 transition-colors">Register</a>
+                        <Link to="/register" className="text-white hover:text-gray-400 transition-colors">Register</Link>
                     )}
 
                     {isLoggedIn && role === 'user' && (
-                        <a href="/courses" className="text-white hover:text-gray-400 transition-colors">MyCourses</a>
+                        <Link to="/My-courses" className="text-white hover:text-gray-400 transition-colors">MyCourses</Link>
                     )}
 
                     {isLoggedIn && role !== 'user' && (
-                        <a href="/uploadCourse" className="text-white hover:text-gray-400 transition-colors">UploadCourse</a>
+                        <Link to="/uploadCourse" className="text-white hover:text-gray-400 transition-colors">UploadCourse</Link>
                     )}
 
                     {isLoggedIn ? (
@@ -43,7 +44,7 @@ const Header = () => {
                             Logout
                         </button>
                     ) : (
-                        <a href="/login" className="text-white hover:text-gray-400 transition-colors">Login</a>
+                        <Link to="/login" className="text-white hover:text-gray-400 transition-colors">Login</Link>
                     )}
                 </nav>
             </div>

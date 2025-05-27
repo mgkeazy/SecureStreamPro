@@ -16,22 +16,54 @@ import enrollmentModel from "../models/enrollment.model.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// upload image to cloudinary
+export const uploadImage = CatchAsyncError(
+  async (req, res, next) => {
+    try {
+
+      if (!req.file) {
+        return next(new ErrorHandler("Please provide an image", 400));
+      }
+      
+      // Convert buffer to base64 string
+      const base64String = req.file.buffer.toString("base64");
+
+      // Build data URI: "data:<mimetype>;base64,<data>"
+      const dataUri = `data:${req.file.mimetype};base64,${base64String}`;
+
+      const myCloud = await cloudinary.v2.uploader.upload(dataUri, {
+        folder: "courses",
+      });
+
+      res.status(200).json({
+        success: true,
+        image: {
+          public_id: myCloud.public_id,
+          url: myCloud.secure_url,
+        },
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
 // upload course
 export const uploadCourse = CatchAsyncError(
   async (req, res, next) => {
     try {
       const data = req.body;
-      const thumbnail = data.thumbnail;
-      if (thumbnail) {
-        const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
-          folder: "courses",
-        });
+      // const thumbnail = data.thumbnail;
+      // if (thumbnail) {
+      //   const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
+      //     folder: "courses",
+      //   });
 
-        data.thumbnail = {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
-        };
-      }
+      //   data.thumbnail = {
+      //     public_id: myCloud.public_id,
+      //     url: myCloud.secure_url,
+      //   };
+      // }
       createCourse(data, res, next);
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
@@ -343,7 +375,7 @@ export const addReview = CatchAsyncError(
         // If no ratings exist (first review), set it to the new rating
         course.ratings = rating;
       }
-      
+
 
       await course?.save();
 
@@ -462,11 +494,11 @@ export const enrollmentRequest = CatchAsyncError(
       // console.log(courseId)
 
       const course = await CourseModel.findById(courseId);
-      
+
       if(!course){
         return next(new ErrorHandler("Course not found", 404));
       }
-  
+
       const user = await userModel.findById(userId);
       if(!user){
         return next(new ErrorHandler("User not found", 404));
@@ -504,11 +536,11 @@ export const enrollmentStatus = CatchAsyncError(
       const {courseId, userId} = req.query;
 
       const course = await CourseModel.findById(courseId);
-      
+
       if(!course){
         return next(new ErrorHandler("Course not found", 404));
       }
-  
+
       const user = await userModel.findById(userId);
       if(!user){
         return next(new ErrorHandler("User not found", 404));
@@ -518,11 +550,11 @@ export const enrollmentStatus = CatchAsyncError(
         user:userId,
         course:courseId,
       });
-      
+
       if(!existingEnrollment){
         return next(new ErrorHandler("You have not performed any operation for this course yet",404))
       }
-      
+
       const status= existingEnrollment.status;
       res.status(201).json({
         success:true,
@@ -556,4 +588,3 @@ export const enrollmentStatus = CatchAsyncError(
 //     }
 //   }
 // );
-

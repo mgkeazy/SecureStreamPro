@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useUserStore from '../store/useUserStore';
 import axios from 'axios';
-import VideoPlayer from '../components/VideoPlayer';
 import { useNavigate } from 'react-router-dom';
 import useVideoStore from '../store/useVideoStore';
 
@@ -27,7 +26,7 @@ const Courses = () => {
     };
     fetchCourses();
   }, []);
-
+  console.log(courses)
   const toggleCourseExpand = (courseId) => {
     setExpandedCourses((prev) => ({
       ...prev,
@@ -44,7 +43,7 @@ const Courses = () => {
 
   return (
     <div className="p-6 bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen pt-24 pb-20 sm:p-8 md:p-10 lg:p-12 xl:p-16">
-      <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10">
+      <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10 pt-5">
         My Courses
       </h1>
       <div className="space-y-8">
@@ -111,11 +110,10 @@ const Courses = () => {
                             <div key={idx} className="bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200">
                               <h4 className="text-indigo-700 font-semibold mb-1 px-2 pt-2">{video.title}</h4>
                               <div className="my-2 px-2">
-                                {/* <VideoPlayer videoId={video.videoUrl} className="w-full h-32 object-cover rounded-md" /> */}
                                 <button
                                   onClick={() => {
                                     setVideoId(video.videoUrl);
-                                    navigate('/watch')
+                                    navigate(`/courses/${course._id}/watch/${video._id}`)
                                   }}
                                   className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition"
                                 >
